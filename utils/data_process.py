@@ -78,6 +78,9 @@ class MyDataset(Dataset):
         self.saliency_dir = saliency_dir
         self.fixation_dir = fixation_dir
         self.transform = transform
+        self.shape_r = 288
+        self.shape_c = 384
+
 
     def __len__(self):
         return len(self.ids)
@@ -88,6 +91,7 @@ class MyDataset(Dataset):
 
         im_path = self.stimuli_dir + self.ids.iloc[idx, 0]
         image = Image.open(im_path).convert('RGB')
+        image = image.resize((self.shape_c, self.shape_r))
         img = np.array(image) / 255.
         img = np.transpose(img, (2, 0, 1))
         img = torch.from_numpy(img)
@@ -96,12 +100,14 @@ class MyDataset(Dataset):
 
         smap_path = self.saliency_dir + self.ids.iloc[idx, 1]
         saliency = Image.open(smap_path)
+        saliency = saliency.resize((self.shape_c, self.shape_r))
 
         smap = np.expand_dims(np.array(saliency) / 255., axis=0)
         smap = torch.from_numpy(smap)
 
         fmap_path = self.fixation_dir + self.ids.iloc[idx, 2]
         fixation = Image.open(fmap_path)
+        fixation = fixation.resize((self.shape_c, self.shape_r))
 
         fmap = np.expand_dims(np.array(fixation) / 255., axis=0)
         fmap = torch.from_numpy(fmap)
@@ -109,8 +115,3 @@ class MyDataset(Dataset):
         sample = {'image': img, 'saliency': smap, 'fixation': fmap}
 
         return sample
-
-
-
-
-
